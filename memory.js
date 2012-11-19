@@ -1,30 +1,63 @@
 //var data = [{"text":"Twitter", "count":2}, {"text":"Facebook", "count":2},{"text":"Spotify", "count":2}, {"text":"Grooveshark", "count":2}, {"text":"Pandora", "count":2}, {"text":"Instagram", "count":2}];
 
 window.onload = function(){
-	ajax();
+	//MAX_LENGTH = 6;
+	//add event listeners to the button
+	var play_button = document.getElementsByClassName("button")[0];
+	play_button.addEventListener("click", function(e){
+		console.log("the play button was clicked");
+		var username = document.getElementsByClassName("username-input")[0].value;
+		console.log(username);
+		ajax(username);
+	}, false);
 }
 
 function jsoncallback(json){
+	MAX_LENGTH = 6;
+	console.log("in callback");
+	console.log(json);
 	var txt='';
 	var data=[];
+	console.log("before loop");
 
-   	for(var i=0; i<json.length; i++){ 
-   		//var cnt = 2;
-    	txt = json[i].text;
-    	var obj = {text:txt,count:2};
-    	
-    	data.push(obj);
-  	}
-  		board.load(data);
+	console.log(json.length);
+
+	//if json.length<MAX_LENGTH
+	//console.log('Bummer, not enough tweets to play. Choose another username')
+	//if json.error!='', console.log('This user is private. Choose another username')  
+//if there's data, and it's valid, do the following...
+
+	//if(json.length>=MAX_LENGTH){
+	   	for(var i=0; i<MAX_LENGTH; i++){
+	   	console.log("in loop"); 
+	   		//var cnt = 2;
+	    	txt = json[i].text;
+	    	console.log(txt);
+	    	var obj = {text:txt,count:2};
+	    	
+	    	console.log(obj);
+	    	data.push(obj);
+	  	}
+	  	console.log("after loop");
+	  	console.log(data);
+	  	board.load(data);
+	  	//console.log(document.getElementsByClassName("username")[0]);
+	  	document.getElementsByClassName("username")[0].style.display = 'none';
+	  	document.getElementsByClassName("divTable")[0].style.display = "table";
+  	//}
+  	//else{
+  	//	console.log('Bummer, not enough tweets to play. Choose another username.');
+  	//}
 }
 
-var ajax = function(){
+var ajax = function(username, MAX_LENGTH){
+	console.log(username);
 	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name=djlindsey&count=6";
 	$.ajax({
 		  url: url,
 		  dataType: "jsonp",
 		  jsonp : "callback",
-		  jsonpCallback: "jsoncallback"
+		  jsonpCallback: "jsoncallback",
 	});
 }
 
@@ -41,6 +74,8 @@ var board ={
 	/*loads the game board with data*/
 
 	load : function (data){
+		console.log("in load");
+		console.log(data[0]["count"]);
 		var self = this;
 		var random_num = 0;
 		var filled_cell = true;
@@ -60,6 +95,7 @@ var board ={
 				and decrease by one. data used to fill a cell can only be used twice.*/
 					random_num = board.getRandomNum(data);
 				
+					console.log(random_num);
 					if(data[random_num]["count"]>0){
 						var new_card = new card(data[random_num]["text"], "row"+j);
 						//this.game_board.appendChild(new_card.getCardMarkup());
@@ -89,7 +125,7 @@ var board ={
 		})
 	}, 
 
-	/*returns a randomly generated number btwn the valuse of 0 and one minus the length of the data array*/
+	/*returns a randomly generated number btwn the valuse of 0 and the length of the data array*/
 	getRandomNum: function (data){
 		return Math.floor((Math.random()*(data.length)));
 	},
@@ -98,8 +134,6 @@ var board ={
 			//gray out cell and disable click/remove click event listener 
 			this.current_clicks[i].target.classList.remove("on");
 			this.current_clicks[i].target.classList.add("off");
-			//this.current_clicks[i].target.style.color = 'white';
-			//this.current_clicks[i].target.display = 'none';
 			//this.game_board.removeChild(this.current_clicks[i].target);
 		}	
 		this.click_num = 0;
