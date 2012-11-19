@@ -1,47 +1,72 @@
-//var data = ["Twitter", "Facebook", "Spotify", "Grooveshark", "Pandora", "Instagram"];
-/*for (var obj in data) {
-      alert(obj + " = " + obj[data]);
-   }*/
+//var data = [{"text":"Twitter", "count":2}, {"text":"Facebook", "count":2},{"text":"Spotify", "count":2}, {"text":"Grooveshark", "count":2}, {"text":"Pandora", "count":2}, {"text":"Instagram", "count":2}];
 
-/*the board should have a listener, and should count the clicks. if click count ==2 then check to see that if the two boxes click match each other. if they do
-play video, otherwise, turn them over.*/
+window.onload = function(){
+	ajax();
+}
 
-var data = [{"name":"Twitter", "count":2}, {"name":"Facebook", "count":2},{"name":"Spotify", "count":2}, {"name":"Grooveshark", "count":2}, {"name":"Pandora", "count":2}, {"name":"Instagram", "count":2}];
+function jsoncallback(json){
+	var txt='';
+	var data=[];
+
+   	for(var i=0; i<json.length; i++){ 
+   		//var cnt = 2;
+    	txt = json[i].text;
+    	var obj = {text:txt,count:2};
+    	
+    	data.push(obj);
+  	}
+  		board.load(data);
+}
+
+var ajax = function(){
+	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name=djlindsey&count=6";
+	$.ajax({
+		  url: url,
+		  dataType: "jsonp",
+		  jsonp : "callback",
+		  jsonpCallback: "jsoncallback"
+	});
+}
+
 
 var board ={
-	/*loads the game board with data*/
-	click_num: 0,
-	current_clicks: [],
-	game_board: '',
-	//listener: '',
+	click_num:0,
+	card_count:0,
+	current_clicks:[],
+	game_board:'',
+	cards:[],
+	board_length:4,
+	board_width:3,
 
-	load : function (){
+	/*loads the game board with data*/
+
+	load : function (data){
+		var self = this;
 		var random_num = 0;
 		var filled_cell = true;
-		var board_length = 4;
-		var board_width = 3;
-		var game_board = document.getElementById("board"); //would be better to actually access this by class name?
-		this.game_board = game_board;
+		
+		this.game_board = document.getElementById("board");//would be better to actually access this by class name?
 
-		var self = this;
-			
-		for(var i = 0; i<board_length; i++){
-			for(var j = 0; j<board_width; j++){
-				while(filled_cell){//loop until a cell is filled with an item from the data array
+		for(var i = 0; i<this.board_length; i++){
+			var row = document.createElement("div");
+			row.className = "divRow";
+			this.game_board.appendChild(row);
+
+			for(var j = 0; j<this.board_width; j++){
+				//loop until a cell is filled with an item from the data array
+				while(filled_cell){
+				
 				/*if the count value of the randomly generated index for data is greater than 0, fill the board with that info
 				and decrease by one. data used to fill a cell can only be used twice.*/
-					random_num = board.getRandomNum();
+					random_num = board.getRandomNum(data);
 				
 					if(data[random_num]["count"]>0){
-						/*var new_card = new card();
-						new_card.initialize(data[random_num]["name"], "row"+j);
-						this.game_board.appendChild(new_card.getCardMarkup());*/
+						var new_card = new card(data[random_num]["text"], "row"+j);
+						//this.game_board.appendChild(new_card.getCardMarkup());
+						row.appendChild(new_card.getCardMarkup());
+						this.card_count++;
+						this.cards.push(new_card);
 
-						card.initialize(data[random_num]["name"], "row"+j); //QUESTION: how does this area of code see "card"?
-
-						var new_card = card.getCardMarkup();
-
-						this.game_board.appendChild(new_card);
 						data[random_num]["count"] = data[random_num]["count"]-1;
 						filled_cell = false;
 					}
@@ -55,61 +80,55 @@ var board ={
 			if(self.click_num==2){
 				self.compareClicks();
 				
+				//pause before resetting clicks...
 				//reset clicks
-				self.resetClicks();
+				setTimeout(function(){
+					self.resetClicks();
+					}, 500);
 			}
 		})
 	}, 
 
 	/*returns a randomly generated number btwn the valuse of 0 and one minus the length of the data array*/
-	getRandomNum: function (){
+	getRandomNum: function (data){
 		return Math.floor((Math.random()*(data.length)));
 	},
 	resetClicks:function(){
+		for(var i = 0; i<this.current_clicks.length; i++){
+			//gray out cell and disable click/remove click event listener 
+			this.current_clicks[i].target.classList.remove("on");
+			this.current_clicks[i].target.classList.add("off");
+			//this.current_clicks[i].target.style.color = 'white';
+			//this.current_clicks[i].target.display = 'none';
+			//this.game_board.removeChild(this.current_clicks[i].target);
+		}	
 		this.click_num = 0;
 		this.current_clicks = [];
-		//console.log("in reset clicks");
-		//console.log(this.current_clicks);
 	},
 
 	incrementClicks: function(){
 		this.click_num++;
 	}, 
 
-	//recordClick: function(val, element){
 	recordClick: function(element){
-		console.log("in record click");
-
-		//this.current_clicks.push({"name":val, "element":element.target});
-		this.current_clicks.push(element.target);
-		//console.log("after");
-		//console.log(this.current_clicks);
-		
-		/*element.removeEventListener("click", function(e){
-			console.log("disabled element");
-		});*/
+		this.current_clicks.push(element);
 	},
 
 	compareClicks: function(){
-		/*if(this.current_clicks[0]["name"]==this.current_clicks[1]["name"]){
+		//this should be changed to compare something like "match_id"
+		if(this.current_clicks[0].target.innerHTML==this.current_clicks[1].target.innerHTML){
 			console.log("It's a match!");
-			board.removeCard();
-		}*/
-		if(this.current_clicks[0].innerHTML==this.current_clicks[1].innerHTML){
-			console.log("It's a match!");
-			board.removeCard();
+
+			setTimeout(function(){
+				board.removeCard();
+					}, 500);
 		}
 		else{
-			/*for(var i = 0; i<this.current_clicks.length; i++){
-				var target = this.current_clicks[0]["element"];
-				card.addListener(target);
-				console.log("Welp :/");
-			}*/
 			for(var i = 0; i<this.current_clicks.length; i++){
-				//var target = this.current_clicks[i]["element"];
 				var target = this.current_clicks[i];
-				card.addListener(target);
-				//console.log(target);
+				target.target.addEventListener("click", board.cards[target.target.id].listener, false);
+				//target.target.addListener(board.cards[target.target.id].listener);
+				// QUESTION: is there anyway to obtain the object that the markup is attached to?
 			}
 			console.log("Welp :/");
 		}
@@ -117,59 +136,70 @@ var board ={
 
 	removeCard: function(){
 		for(var i = 0; i<this.current_clicks.length; i++){
-			//this.game_board.removeChild(this.current_clicks[i]["element"]);
-			this.game_board.removeChild(this.current_clicks[i]);
+			//gray out cell and disable click/remove click event listener 
+			this.current_clicks[i].target.classList.remove("on");
+			this.current_clicks[i].target.classList.add("removed");
+			//this.game_board.removeChild(this.current_clicks[i].target);
 		}
 	}
 
 }
 
-var card = {
-	
-	card_name: '',
-	
-	markup: '',
-	
-	listener: '',
 
-	setName: function(name){
-		this.card_name = name;
-	},
-
-	getName: function(){
-		return this.card_name;
-	},
-
-	initialize: function(name, class_name){
+var card = function(text, class_name) {
 		var div = document.createElement("div");//should div have this prepended on it?
-		div.innerHTML = name;
-		div.className = class_name;
+		div.innerHTML = text;
+		//div.className = "divCell";//class_name;
+		div.classList.add("divCell");
+		div.classList.add("off");
+		div.id = board.card_count;
 
 		this.markup = div;
 		this.card_name = name;//QUESTION: should i actually be using the setter method?
 		var self = this;
 
 		var listener = function (e) {
-		  board.incrementClicks();
-		  //board.recordClick(self.card_name, e);//QUESTION: what is actually happening when self.name is changed to name? 
-		  board.recordClick(e);//QUESTION: what is actually happening when self.name is changed to name? 
-		  this.removeEventListener("click", listener, false);
+			div.classList.remove("off");
+			div.classList.add("on");
+		  	board.incrementClicks();
+		  	board.recordClick(e);//QUESTION: what is actually happening when self.name is changed to name? 
+		  	this.removeEventListener("click", listener, false);
 		};
 
 		this.listener = listener;
 
+		//TODO: understand the differences btwn the above code and below code
+
 		/*this.listener = function (e) {
 		  board.incrementClicks();
-		  board.recordClick(name, e);
+		  board.recordClick(text, e);
 		  this.removeEventListener("click", this.listener, false);
 		};*/
 
-		div.addEventListener("click", listener, false);
-		//card.addListener(div);
+		this.markup.addEventListener("click", this.listener, false);
+}
 
+card.prototype = {
+	settext: function(text){
+		this.card_name = text;
+	},
 
-		
-		//QUESTION: ok, so what happens here? I have an event listener on both the board and the card/div...what happens first? so it seems like the card event listener fires first. why is that?
+	getName: function(){
+		return this.card_name;
+	},
+
+	/*TODO: remove this b/c not using. or try to figure out how to make it reusable*/
+	addListener: function(){
+		console.log("in add listener");
+		this.markup.addEventListener("click", this.listener, false);
+	},
+
+	getCardMarkup: function(){
+		return this.markup
+	}
+}
+
+//QUESTION: ok, so what happens here? I have an event listener on both the board and the card/div...what happens first? so it seems like the card event listener fires first. why is that?
 		/*NOTE: this is the element that has added the event listener, div in this case
 					e is the mouse event
 					self is the object passed in outside/around/surrounding this event listener
@@ -178,20 +208,106 @@ var card = {
 		//QUESTION: why doesn't this work? but the technique above does?
 		/*div.addEventListener("click", function(e){
 			board.incrementClicks();
-			board.recordClick(name, e);//why is it that this.name...or self.name returns the last item to be created? also, how does this event listener know how to reference "name"...the name assigned to the div?
+			board.recordClick(name, e);//why is it that this.text...or self.text returns the last item to be created? also, how does this event listener know how to reference "text"...the text assigned to the div?
 			this.removeEventListener("click", function(e2){
 				board.incrementClicks();
-				board.recordClick(name, e2);		
+				board.recordClick(text, e2);		
 			})
 		});*/
 
-	},
 
-	addListener: function(element){
-		element.addEventListener("click", card.listener, false);
-	},
 
-	getCardMarkup: function(){
-		return this.markup
+/*WHY CAN'T I DO THIS AJAX CALL WITHIN THE FUNCTION INIT..OR WITHIN WINDOW.LOAD?..ALSO, HOW CAN THIS BE DONE WITHOUT USING JQUERY? I.E. USING XMLHTTPREQUEST ETC?
+var data_new = {
+	init: function(){
+		
+		var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_text=djlindsey&count=1";
+		$.ajax({
+		  url: url,
+		  dataType: "jsonp",
+		  jsonp : "callback",
+		  jsonpCallback: "jsonpcallback"
+		  });
+
+		function jsonpcallback(json) {
+
+		   for (var i=0; i<data.length; i++){ 
+		    console.log(json[i].text);
+		  }
+		}
 	}
-}
+}*/
+
+
+/*var data_new = {
+
+	ajax: function(){
+		console.log("this happended");
+		var xmlhttp;
+		if(window.XMLHttpRequest)
+		{	// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp=new XMLHttpRequest();
+		}
+		else
+		{	// code for IE6, IE5
+		  	xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		    {
+		    	document.getElementById("myDiv").innerHTML=xmlhttp.responseText;
+		    }
+		}
+		
+		xmlhttp.open("GET","https://api.twitter.com/1/statuses/user_timeline.json?screen_name=djlindsey&count=1",true);
+		xmlhttp.send();
+	},
+
+	cross_ajax: function(){
+		var invocation = new XMLHttpRequest();
+		var url = 'https://api.twitter.com/1/statuses/user_timeline.json?screen_name=djlindsey&count=1';
+     
+		//function callOtherDomain(){
+		  if(invocation) {
+		    invocation.open('GET', url, true);
+		    invocation.withCredentials = true;
+		    //invocation.onreadystatechange = handler;
+
+		    invocation.onreadystatechange = function()
+			{
+				if (invocation.readyState==4 && invocation.status==200)
+		    	{
+		    		document.getElementById("myDiv").innerHTML=xmlhttp.responseText;
+		    	}
+			}
+		    	invocation.send(); 
+		  }*/
+
+		
+		/*var invocation = new XMLHttpRequest();
+	    var url = 'http://aruner.net/resources/access-control-with-post-preflight/';
+	    var invocationHistoryText;
+	    var body = '<?xml version="1.0"?><person><name>Arun</name></person>';
+	    
+	    function callOtherDomain(){
+	        if(invocation)
+	        {
+	            invocation.open('POST', url, true);
+	            invocation.setRequestHeader('X-PINGARUNER', 'pingpong');
+	            invocation.setRequestHeader('Content-Type', 'application/xml');
+	            invocation.onreadystatechange = handler;
+	            invocation.send(body); 
+	        }
+	        else
+	        {
+	            invocationHistoryText = "No Invocation TookPlace At All";
+	            var textNode = document.createTextNode(invocationHistoryText);
+	            var textDiv = document.getElementById("textDiv");
+	            textDiv.appendChild(textNode);
+	        }
+        
+    	}*/
+	/*}
+}*/
