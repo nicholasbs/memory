@@ -1,66 +1,101 @@
 //var data = [{"text":"Twitter", "count":2}, {"text":"Facebook", "count":2},{"text":"Spotify", "count":2}, {"text":"Grooveshark", "count":2}, {"text":"Pandora", "count":2}, {"text":"Instagram", "count":2}];
 
 window.onload = function(){
-	//MAX_LENGTH = 6;
 	//add event listeners to the button
 	var play_button = document.getElementsByClassName("button")[0];
 	play_button.addEventListener("click", function(e){
-		console.log("the play button was clicked");
 		var username = document.getElementsByClassName("username-input")[0].value;
-		console.log(username);
 		ajax(username);
+	}, false);
+
+	var play_again = document.getElementsByClassName("play-again")[0];
+	play_again.addEventListener("click", function(e){
+		utilities.clearInputs();
+		location.reload();
 	}, false);
 }
 
 function jsoncallback(json){
+	console.log(json.length);
+	var shift = true;
+	var json_tmp = [];
+	var json_new = [];
+
+	/*shuffle tweets*/
+	//copy tweets into tmp array
+	/*for(var i=0; i<json.length; i++){
+		json_tmp.push(json[i]);
+	}
+
+	for(var i=0; i<json.length; i++){
+		if(shift){
+			json_new.push(json_tmp.shift());
+			shift=false;
+		}
+		else{
+			json_new.push(json_tmp.pop());
+			shift=true;
+		}
+	}*/
+
+	for (var i = json.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = json[i];
+        json[i] = json[j];
+        json[j] = temp;
+    }	
+
 	MAX_LENGTH = 6;
-	console.log("in callback");
-	console.log(json);
 	var txt='';
 	var data=[];
-	console.log("before loop");
+	
+	//if there's data, and it's valid, do the following...
 
-	console.log(json.length);
-
-	//if json.length<MAX_LENGTH
-	//console.log('Bummer, not enough tweets to play. Choose another username')
-	//if json.error!='', console.log('This user is private. Choose another username')  
-//if there's data, and it's valid, do the following...
-
-	//if(json.length>=MAX_LENGTH){
+	if(json.length>=MAX_LENGTH){
 	   	for(var i=0; i<MAX_LENGTH; i++){
-	   	console.log("in loop"); 
-	   		//var cnt = 2;
 	    	txt = json[i].text;
-	    	console.log(txt);
-	    	var obj = {text:txt,count:2};
 	    	
-	    	console.log(obj);
+	    	var obj = {text:txt,count:2};	    	
 	    	data.push(obj);
 	  	}
-	  	console.log("after loop");
-	  	console.log(data);
-	  	board.load(data);
-	  	//console.log(document.getElementsByClassName("username")[0]);
+	  	board.load(data, MAX_LENGTH);
 	  	document.getElementsByClassName("username")[0].style.display = 'none';
-	  	document.getElementsByClassName("divTable")[0].style.display = "table";
-  	//}
-  	//else{
-  	//	console.log('Bummer, not enough tweets to play. Choose another username.');
-  	//}
+	  	document.getElementsByClassName("div-table")[0].style.display = "table";
+  	}
+  	else if(json.error=="Not authorized"){
+		console.log('This user is private. Choose another username');   	
+	}
+	else if(json.errors!="")
+	{
+		console.log("This user doesn't exist. Choose another username");
+	}
+  	else{
+  		//maybe make an error object that routes errors accordingly?
+  		console.log('Bummer, not enough tweets to play. Choose another username.');
+  	}
 }
 
-var ajax = function(username, MAX_LENGTH){
-	console.log(username);
-	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name=djlindsey&count=6";
+
+var ajax = function(username){
+	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
 	$.ajax({
 		  url: url,
 		  dataType: "jsonp",
 		  jsonp : "callback",
-		  jsonpCallback: "jsoncallback",
+		  jsonpCallback: "jsoncallback"
 	});
 }
 
+var utilities = {
+	clearInputs:function(){
+		//this should be made to be more general, but for now...
+		document.getElementsByClassName("username-input")[0].value = '';
+	}
+}
+
+var error = {
+
+}
 
 var board ={
 	click_num:0,
@@ -70,12 +105,12 @@ var board ={
 	cards:[],
 	board_length:4,
 	board_width:3,
+	number_of_matches:0,
 
 	/*loads the game board with data*/
 
-	load : function (data){
-		console.log("in load");
-		console.log(data[0]["count"]);
+	load : function (data, MAX_LENGTH){
+		this.max_length = MAX_LENGTH;
 		var self = this;
 		var random_num = 0;
 		var filled_cell = true;
@@ -84,7 +119,7 @@ var board ={
 
 		for(var i = 0; i<this.board_length; i++){
 			var row = document.createElement("div");
-			row.className = "divRow";
+			row.className = "div-row";
 			this.game_board.appendChild(row);
 
 			for(var j = 0; j<this.board_width; j++){
@@ -94,8 +129,7 @@ var board ={
 				/*if the count value of the randomly generated index for data is greater than 0, fill the board with that info
 				and decrease by one. data used to fill a cell can only be used twice.*/
 					random_num = board.getRandomNum(data);
-				
-					console.log(random_num);
+
 					if(data[random_num]["count"]>0){
 						var new_card = new card(data[random_num]["text"], "row"+j);
 						//this.game_board.appendChild(new_card.getCardMarkup());
@@ -120,14 +154,22 @@ var board ={
 				//reset clicks
 				setTimeout(function(){
 					self.resetClicks();
-					}, 500);
+
+					//if number of matches found == MAX_LENGTH, the game has ended, ask to reload board...
+					if(board.number_of_matches==board.max_length){
+
+						document.getElementsByClassName("username")[0].style.zIndex = -1;
+						document.getElementsByClassName("play-again")[0].style.display = 'inline';
+
+					}
+				}, 500);
 			}
 		})
 	}, 
 
 	/*returns a randomly generated number btwn the valuse of 0 and the length of the data array*/
-	getRandomNum: function (data){
-		return Math.floor((Math.random()*(data.length)));
+	getRandomNum: function (){
+		return Math.floor((Math.random()*(this.max_length)));
 	},
 	resetClicks:function(){
 		for(var i = 0; i<this.current_clicks.length; i++){
@@ -156,6 +198,7 @@ var board ={
 			setTimeout(function(){
 				board.removeCard();
 					}, 500);
+			this.number_of_matches++;
 		}
 		else{
 			for(var i = 0; i<this.current_clicks.length; i++){
@@ -184,7 +227,7 @@ var card = function(text, class_name) {
 		var div = document.createElement("div");//should div have this prepended on it?
 		div.innerHTML = text;
 		//div.className = "divCell";//class_name;
-		div.classList.add("divCell");
+		div.classList.add("div-cell");
 		div.classList.add("off");
 		div.id = board.card_count;
 

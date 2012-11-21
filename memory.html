@@ -1,108 +1,20 @@
-<doctype html>
+<!doctype html>
 <html>
   <head>
     <title>Memory</title>
-    <!-- JavaScript and HTML must be in separate files for security.-->
+    <link href="css/styles.css" type="text/css" rel="stylesheet"></link>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
     <script src="memory.js"></script>
-    <style>
-      .divTable
-      {
-        /*display:table;*/
-        width:auto;
-        position: relative;
-        left:150px;
-        display: none;
-      }
-
-      .divRow
-      {
-        display:table-row;
-        width:auto;
-      }
-
-      .divCell
-      {
-        float:left;/*fix for  buggy browsers*/
-        display:table-column;
-        width:250px;
-        height:90px;
-        padding:30px;
-        border:1px solid #E8E8E8;
-        font-size: 12px;
-        color:#0084B4;
-        background-color: #F9F9F9;
-      }
-
-      .off
-      {
-        color:#F9F9F9;
-      }
-
-      .on
-      {
-        color:#0084B4;
-      }
-
-      .removed
-      {
-        color:#C7C7C7;
-      }
-
-      .username
-      {
-        position: absolute;
-        top: 105;
-        left: 536px;
-        width: 300px;
-        height: 85px;
-
-        border-radius: 4px 4px 4px 4px;
-
-        background: -moz-linear-gradient(center top , #FFFFFF 0px, #DDDDDD 100%) repeat scroll 0 0 transparent;
-        border-bottom: 1px solid #CCCCCC;
-        border-left: 1px solid #EEEEEE;
-        border-right: 1px solid #EEEEEE;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-
-        color: #333333;
-        font-size: 14px;
-        line-height: 18px;
-        padding: 30px 0px 0px 30px;
-      }
-
-      .username-input
-      {
-        top:20px;
-        height: 20px;
-        width:266px;
-        border: 1px solid #CCCCCC;
-        box-shadow: 0 1px 0 #EEEEEE inset, 0 1px 0 #FFFFFF;
-        border-radius: 4px 4px 4px 4px;
-      }
-
-      .button{
-        background-color: #019AD2;
-        background-image: linear-gradient(#33BCEF, #019AD2);
-        background-repeat: repeat-x;
-        border-color: #057ED0;
-        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
-        color: #FFFFFF;
-        text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.2);
-        position: relative;
-        top:35px;
-        border-radius: 4px 4px 4px 4px;
-      }
-
-    </style>
   </head>
   <body>
-  <div id="board" class="divTable"></div>
+  <h1 class="memory">Memory</h1>
+  <div id="board" class="div-table"></div>
   <div class="username">
-    <form action="">
-      <input class="username-input" type="text" name="uname" placeholder="Please enter a username"><br>
+      <input class="username-input" type="text" name="uname" placeholder="Enter a twitter username"><br>
       <button class="button" type="button">Play!</button>
-    </form>
+  </div>
+  <div class="play-again">
+      <button class="button" type="button">Play Again?</button>
   </div>
   </body>
 </html>
