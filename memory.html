@@ -8,12 +8,20 @@
   </head>
   <body>
   <h1 class="memory">Memory</h1>
-  <div id="board" class="div-table"></div>
-  <div class="username">
+  <div id="board" class="div-table hide-table"></div>
+  <div id="message-drawer" class="alert-messages hide">
+    <div class="message ">
+      <div class="message-inside">
+        <span class="message-text">We gotta check...are you human?</span>
+        <!--a class="dismiss" href="#">×</a-->
+      </div>
+    </div>
+  </div>
+  <div id="username" class="username">
       <input class="username-input" type="text" name="uname" placeholder="Enter a twitter username"><br>
       <button class="button" type="button">Play!</button>
   </div>
-  <div class="play-again">
+  <div id="play-again" class="play-again hide">
       <button class="button" type="button">Play Again?</button>
   </div>
   </body>
