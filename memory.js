@@ -61,9 +61,7 @@ var utilities = {
 	*Implements event delegation for clicks within the container...the game board
 	*/
 	delegate:function(e){
-		console.log("something withing the container was clicked");
-		console.log(e);
-
+		
 		var target = e ? e.target : window.event.srcElement; //for IE 
 
 		//play button clicked
