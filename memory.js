@@ -1,64 +1,10 @@
 /**
- 	* Adds click event listeners to the "play" and "play again" buttons when the window loads.
- */
+ 	* Adds click event listeners to the "play" and "play again" buttons and starts game when the window loads.
+**/
 window.onload = function(){
-	//var play_button = document.getElementsByClassName("button")[0];
-	//TODO: try abstracting things out and making the following a reusable function
-	//QUESTION: is it advisable to just give the input elements id values vs doing all that i'm doing below(in the name of only having classes)?
-	var msg_obj = new Message();
-	var play_button='';
-	var username_element_inputs = document.getElementById("username").getElementsByTagName("button");
-			var i=0;
-			var found = false;
 
-			while(i<username_element_inputs.length && (!found)){
-				if(username_element_inputs[i].classList.contains("button")){
-					play_button = username_element_inputs[i];
-					found = true;
-				}			
-				i++;
-			}
-
-	play_button.addEventListener("click", function(e){
-
-		//if there's a username make ajax request
-		try{
-			//var username = document.getElementsByClassName("username-input")[0].value;
-			var username='';
-			var username_element_inputs = document.getElementById("username").getElementsByTagName("input");
-			var i=0;
-			var found = false;
-
-			while(i<username_element_inputs.length && (!found)){
-				if(username_element_inputs[i].classList.contains("username-input")){
-					username = username_element_inputs[i].value;
-					found = true;
-				}			
-				i++;
-			}
-
-			if(username==''){
-				throw new UserException("Must enter username to play.");
-			}
-			else{
-				msg_obj.getMessageDrawer().classList.add("hide");
-				//document.getElementById("message-drawer").style.display = 'none';
-				executeAjaxHandler(username);
-			}
-		}
-		catch(err){
-			console.log(err.name);
-			/*HERE*/msg_obj.getMessageDrawer().getElementsByClassName("message-text")[0]
-			/*HERE*/document.getElementsByClassName("message-text")[0].innerHTML = err.msg;
-			msg_obj.getMessageDrawer().classList.remove(err.class_name);//QUESTION: is this line absolutely unecessary? is it better to do the line below? i added this line to avoid accessing the dom so much...
-		}
-	}, false);
-
-	var play_again = document.getElementById("play-again");
-	play_again.addEventListener("click", function(e){
-		utilities.clearInputs();
-		location.reload();
-	}, false);
+	var container = document.getElementById("container");
+	container.addEventListener("click", utilities.delegate, false);
 }
 
 //QUESTION: why doesn't jquery ajax module recognize the anonymous version of this function?
@@ -67,6 +13,7 @@ function jsoncallback(json){
 	var txt='';
 	var data=[];
 
+	//shuffle tweets. fisher yates suffle
 	for (var i = json.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var temp = json[i];
@@ -86,10 +33,10 @@ function jsoncallback(json){
 	  	document.getElementById("board").classList.remove("hide");
 	  	document.getElementById("board").classList.add("show-table");
   	}
-  	else if(json.error=="Not authorized"){
+  	else if(json.error==="Not authorized"){
 		console.log('This user is private. Choose another username');   	
 	}
-	else if(json.errors!=""){
+	else if(json.errors!==""){
 		console.log("This user doesn't exist. Choose another username");
 	}
   	else{
@@ -98,33 +45,28 @@ function jsoncallback(json){
   	}
 }
 
+var play_game = function(){
+		var msg_obj = new Message();
 
-var executeAjaxHandler = function(username){
-	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
+		//if there's a username make ajax request
+		try{
+			var username = document.getElementById("username").getElementsByTagName("input")[0].value;
 
-	$.ajax({
-			  url: url,
-			  dataType: "jsonp",
-			  jsonp : "callback",
-			  jsonpCallback: "jsoncallback"
-		});
-}
-
-var Message = function(){
-	var message_drawer = document.getElementById("message-drawer");
-	this.message_drawer = message_drawer;
-}
-
-Message.prototype = {
-	getMessageDrawer:function(){
-		return this.message_drawer;
-	}
-}
-
-var UserException = function(msg){
-	this.msg = msg;
-	this.name = "UserException";
-	this.class_name = "hide";
+			if(username==''){
+				throw new UserException("Must enter username to play.");
+			}
+			else{
+				//document.getElementById("message-drawer").style.display = 'none';
+				msg_obj.getMessageDrawer().classList.add("hide");
+				executeAjaxHandler(username);
+			}
+		}
+		catch(err){
+			console.log(err.name);
+			/*HERE*/msg_obj.getMessageDrawer().getElementsByClassName("message-text")[0];
+			/*HERE*/document.getElementsByClassName("message-text")[0].innerHTML = err.msg;
+			msg_obj.getMessageDrawer().classList.remove(err.class_name);//QUESTION: is this line absolutely unecessary? is it better to do the line below? i added this line to avoid accessing the dom so much...
+		}
 }
 
 var utilities = {
@@ -134,6 +76,41 @@ var utilities = {
 		for(var i = 0; i<input_elements.length; i++){
 			input_elements[i].value = '';
 		}		
+	},
+
+	/**
+		*Implements event delegation for clicks within the container...the game board
+	*/
+	delegate:function(e){
+		console.log("something withing the container was clicked");
+		console.log(e);
+
+		var target = e ? e.target : window.event.srcElement; //for IE 
+
+		//play button clicked
+		if(target.parentNode.className==="username" && target.className==="button"){
+			play_game();
+		}//play again button clicked
+		else if(target.parentNode.className==="play-again" && target.className==="button"){
+			utilities.clearInputs();
+			location.reload();
+		}//div cell...essentially the board has been clicked
+		else if(target.className==="div-cell on"){
+			if(board.click_num===2){
+				board.compareClicks();
+				
+				//pause before resetting clicks...
+				setTimeout(function(){
+					board.resetClicks();
+
+					//if number of matches found == MAX_LENGTH, the game has ended, ask to reload board...
+					if(board.number_of_matches===board.max_length){
+						document.getElementById("username").classList.toggle("z-index");
+						document.getElementById("play-again").classList.toggle("hide");
+					}
+				}, 500);
+			}
+		}
 	}
 }
 
@@ -183,23 +160,6 @@ var board = {
 				filled_cell = true;
 			}
 		}
-
-		this.game_board.addEventListener("click", function(e){
-			if(self.click_num==2){
-				self.compareClicks();
-				
-				//pause before resetting clicks...
-				setTimeout(function(){
-					self.resetClicks();
-
-					//if number of matches found == MAX_LENGTH, the game has ended, ask to reload board...
-					if(board.number_of_matches==board.max_length){
-						document.getElementById("username").classList.toggle("z-index");
-						document.getElementById("play-again").classList.toggle("hide");
-					}
-				}, 500);
-			}
-		})
 	}, 
 
 	/*returns a randomly generated number btwn the values of 0 and the length of the data array*/
@@ -226,7 +186,7 @@ var board = {
 
 	compareClicks: function(){
 		//this should be changed to compare something like "match_id"
-		if(this.current_clicks[0].target.innerHTML==this.current_clicks[1].target.innerHTML){
+		if(this.current_clicks[0].target.innerHTML===this.current_clicks[1].target.innerHTML){
 			console.log("It's a match!");
 
 			setTimeout(function(){
@@ -237,6 +197,8 @@ var board = {
 		else{
 			for(var i = 0; i<this.current_clicks.length; i++){
 				var target = this.current_clicks[i];
+				
+				//add the listener back to the card
 				target.target.addEventListener("click", board.cards[target.target.id].listener, false);
 				// QUESTION: is there anyway to obtain the object that the markup is attached to?
 			}
@@ -254,6 +216,16 @@ var board = {
 
 }
 
+var executeAjaxHandler = function(username){
+	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
+
+	$.ajax({
+			  url: url,
+			  dataType: "jsonp",
+			  jsonp : "callback",
+			  jsonpCallback: "jsoncallback"
+		});
+}
 
 var Card = function(text) {
 		var div = document.createElement("div");//should div have this prepended on it?
@@ -263,14 +235,14 @@ var Card = function(text) {
 		div.id = board.card_count;
 
 		this.markup = div;
-		this.card_name = name;//QUESTION: should i actually be using the setter method?
+		this.card_name = name;
 		var self = this;
 
 		var listener = function (e) {
 			div.classList.remove("off");
 			div.classList.add("on");
 		  	board.incrementClicks();
-		  	board.recordClick(e);//QUESTION: what is actually happening when self.name is changed to name? 
+		  	board.recordClick(e);
 		  	this.removeEventListener("click", listener, false);
 		};
 
@@ -291,5 +263,22 @@ Card.prototype = {
 	getCardMarkup: function(){
 		return this.markup
 	}
+}
+
+var Message = function(){
+	var message_drawer = document.getElementById("message-drawer");
+	this.message_drawer = message_drawer;
+}
+
+Message.prototype = {
+	getMessageDrawer:function(){
+		return this.message_drawer;
+	}
+}
+
+var UserException = function(msg){
+	this.msg = msg;
+	this.name = "UserException";
+	this.class_name = "hide";
 }
 
