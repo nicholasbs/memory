@@ -45,31 +45,10 @@ function jsoncallback(json){
   	}
 }
 
-var play_game = function(){
-		var msg_obj = new Message();
-
-		//if there's a username make ajax request
-		try{
-			var username = document.getElementById("username").getElementsByTagName("input")[0].value;
-
-			if(username==''){
-				throw new UserException("Must enter username to play.");
-			}
-			else{
-				//document.getElementById("message-drawer").style.display = 'none';
-				msg_obj.getMessageDrawer().classList.add("hide");
-				executeAjaxHandler(username);
-			}
-		}
-		catch(err){
-			console.log(err.name);
-			/*HERE*/msg_obj.getMessageDrawer().getElementsByClassName("message-text")[0];
-			/*HERE*/document.getElementsByClassName("message-text")[0].innerHTML = err.msg;
-			msg_obj.getMessageDrawer().classList.remove(err.class_name);//QUESTION: is this line absolutely unecessary? is it better to do the line below? i added this line to avoid accessing the dom so much...
-		}
-}
-
 var utilities = {
+	/**
+		*Clears/resets all input elements within the document
+	*/
 	clearInputs:function(){
 		var input_elements = document.getElementsByTagName("input");
 
@@ -89,7 +68,7 @@ var utilities = {
 
 		//play button clicked
 		if(target.parentNode.className==="username" && target.className==="button"){
-			play_game();
+			utilities.validate_input();
 		}//play again button clicked
 		else if(target.parentNode.className==="play-again" && target.className==="button"){
 			utilities.clearInputs();
@@ -111,6 +90,47 @@ var utilities = {
 				}, 500);
 			}
 		}
+	},
+
+	/**
+		*Makes a jsonp ajax call to twitter's api for the username provided
+	*/
+	executeAjaxHandler: function(username){
+		var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
+
+		$.ajax({
+				  url: url,
+				  dataType: "jsonp",
+				  jsonp : "callback",
+				  jsonpCallback: "jsoncallback"
+			});
+	},
+
+	/**
+		*Checks for valid username input. Throws an error if invalid, loads board otherwise.
+	*/
+	validate_input: function(){
+		var msg_obj = new Message();
+
+		//if there's a username make ajax request
+		try{
+			var username = document.getElementById("username").getElementsByTagName("input")[0].value;
+
+			if(username==''){
+				throw new UserException("Must enter username to play.");
+			}
+			else{
+				//document.getElementById("message-drawer").style.display = 'none';
+				msg_obj.getMessageDrawer().classList.add("hide");
+				utilities.executeAjaxHandler(username);
+			}
+		}
+		catch(err){
+			console.log(err.name);
+			/*HERE*/msg_obj.getMessageDrawer().getElementsByClassName("message-text")[0];
+			/*HERE*/document.getElementsByClassName("message-text")[0].innerHTML = err.msg;
+			msg_obj.getMessageDrawer().classList.remove(err.class_name);//QUESTION: is this line absolutely unecessary? is it better to do the line below? i added this line to avoid accessing the dom so much...
+		}
 	}
 }
 
@@ -118,17 +138,16 @@ var board = {
 	click_num:0,
 	card_count:0,
 	current_clicks:[],
-	game_board:'',
 	cards:[],
 	BOARD_LENGTH:4,
 	BOARD_WIDTH:3,
 	number_of_matches:0,
 
-	/*loads the game board with data*/
-
+	/**
+		*Loads the game board with data/returned tweets.
+	*/
 	load : function (data, MAX_LENGTH){
 		this.max_length = MAX_LENGTH;
-		var self = this;
 		var random_num = 0;
 		var filled_cell = true;
 		
@@ -162,13 +181,19 @@ var board = {
 		}
 	}, 
 
-	/*returns a randomly generated number btwn the values of 0 and the length of the data array*/
+	/**
+	*Returns a randomly generated number btwn the values of 0 and the length of the data array.
+	*/
 	getRandomNum: function (){
 		return Math.floor((Math.random()*(this.max_length)));
 	},
+
+	/**
+		*Resets the number of "board" clicks to zero, re-initializes current_clicks value and adjust css
+	*/
 	resetClicks:function(){
 		for(var i = 0; i<this.current_clicks.length; i++){
-			//gray out cell and disable click/remove click event listener 
+			//gray out cell and disable click
 			this.current_clicks[i].target.classList.remove("on");
 			this.current_clicks[i].target.classList.add("off");
 		}	
@@ -176,14 +201,24 @@ var board = {
 		this.current_clicks = [];
 	},
 
+	/**
+		*Increment board click value by one.
+	*/
 	incrementClicks: function(){
 		this.click_num++;
 	}, 
 
+	/**
+		*Add the clicked element to the board's current_click array.
+	*/
 	recordClick: function(element){
 		this.current_clicks.push(element);
 	},
 
+	/**
+		*Compare the values/text of the elements within the board's current_clicks array. If equal, remove card from board, otherwise
+		*add the click event listener back to the elements.
+	*/
 	compareClicks: function(){
 		//this should be changed to compare something like "match_id"
 		if(this.current_clicks[0].target.innerHTML===this.current_clicks[1].target.innerHTML){
@@ -206,6 +241,9 @@ var board = {
 		}
 	},
 
+	/**
+		*Manipulates css to simulate a "removed" card
+	*/
 	removeCard: function(){
 		for(var i = 0; i<this.current_clicks.length; i++){
 			//gray out cell and disable click/remove click event listener 
@@ -216,15 +254,11 @@ var board = {
 
 }
 
-var executeAjaxHandler = function(username){
-	var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
 
-	$.ajax({
-			  url: url,
-			  dataType: "jsonp",
-			  jsonp : "callback",
-			  jsonpCallback: "jsoncallback"
-		});
+var UserException = function(msg){
+	this.msg = msg;
+	this.name = "UserException";
+	this.class_name = "hide";
 }
 
 var Card = function(text) {
@@ -274,11 +308,5 @@ Message.prototype = {
 	getMessageDrawer:function(){
 		return this.message_drawer;
 	}
-}
-
-var UserException = function(msg){
-	this.msg = msg;
-	this.name = "UserException";
-	this.class_name = "hide";
 }
 
