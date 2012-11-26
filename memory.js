@@ -1,5 +1,5 @@
 /**
- 	* Adds click event listeners to the "play" and "play again" buttons and starts game when the window loads.
+* Adds click event listeners to the "play" and "play again" buttons and starts game when the window loads.
 **/
 window.onload = function(){
 
@@ -47,7 +47,7 @@ function jsoncallback(json){
 
 var utilities = {
 	/**
-		*Clears/resets all input elements within the document
+	*Clears/resets all input elements within the document
 	*/
 	clearInputs:function(){
 		var input_elements = document.getElementsByTagName("input");
@@ -58,7 +58,7 @@ var utilities = {
 	},
 
 	/**
-		*Implements event delegation for clicks within the container...the game board
+	*Implements event delegation for clicks within the container...the game board
 	*/
 	delegate:function(e){
 		console.log("something withing the container was clicked");
@@ -107,7 +107,7 @@ var utilities = {
 	},
 
 	/**
-		*Checks for valid username input. Throws an error if invalid, loads board otherwise.
+	*Checks for valid username input. Throws an error if invalid, loads board otherwise.
 	*/
 	validate_input: function(){
 		var msg_obj = new Message();
@@ -144,7 +144,7 @@ var board = {
 	number_of_matches:0,
 
 	/**
-		*Loads the game board with data/returned tweets.
+	*Loads the game board with data/returned tweets.
 	*/
 	load : function (data, MAX_LENGTH){
 		this.max_length = MAX_LENGTH;
@@ -189,7 +189,7 @@ var board = {
 	},
 
 	/**
-		*Resets the number of "board" clicks to zero, re-initializes current_clicks value and adjust css
+	*Resets the number of "board" clicks to zero, re-initializes current_clicks value and adjust css
 	*/
 	resetClicks:function(){
 		for(var i = 0; i<this.current_clicks.length; i++){
@@ -202,22 +202,22 @@ var board = {
 	},
 
 	/**
-		*Increment board click value by one.
+	*Increment board click value by one.
 	*/
 	incrementClicks: function(){
 		this.click_num++;
 	}, 
 
 	/**
-		*Add the clicked element to the board's current_click array.
+	*Add the clicked element to the board's current_click array.
 	*/
 	recordClick: function(element){
 		this.current_clicks.push(element);
 	},
 
 	/**
-		*Compare the values/text of the elements within the board's current_clicks array. If equal, remove card from board, otherwise
-		*add the click event listener back to the elements.
+	*Compare the values/text of the elements within the board's current_clicks array. If equal, remove card from board, otherwise
+	*add the click event listener back to the elements.
 	*/
 	compareClicks: function(){
 		//this should be changed to compare something like "match_id"
@@ -242,7 +242,7 @@ var board = {
 	},
 
 	/**
-		*Manipulates css to simulate a "removed" card
+	*Manipulates css to simulate a "removed" card
 	*/
 	removeCard: function(){
 		for(var i = 0; i<this.current_clicks.length; i++){
