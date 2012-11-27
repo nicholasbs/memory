@@ -41,29 +41,17 @@ function jsoncallback(json) {
 
 var utilities = {
   /**
-  *Clears/resets all input elements within the document
-  */
-  clearInputs: function() {
-    var input_elements = document.getElementsByTagName("input");
-
-    for(var i = 0; i<input_elements.length; i++){
-      input_elements[i].value = '';
-    }
-  },
-
-  /**
   *Implements event delegation for clicks within the container...the game board
   */
   delegate: function(e) {
     var target = e ? e.target : window.event.srcElement; //for IE
 
     //play button clicked
-    if (target.parentNode.className==="username" && target.className==="button") {
+    if (target.parentNode.className === "username" && target.className === "button") {
       utilities.validate_input();
-    } else if (target.parentNode.className==="play-again" && target.className==="button") {
-      utilities.clearInputs();
+    } else if (target.parentNode.className === "play-again" && target.className === "button") {
       location.reload();
-    } else if (target.className === "div-cell on") { //div cell...essentially the board has been clicked
+    } else if (target.className === "div-cell on") {
       if (board.selectedCards.length === 2) {
         board.compareClicks();
 
@@ -72,7 +60,7 @@ var utilities = {
           board.resetClicks();
 
           //if number of matches found == MAX_LENGTH, the game has ended, ask to reload board...
-          if (board.number_of_matches === board.max_length) {
+          if (board.numberOfMatches === board.max_length) {
             document.getElementById("username").classList.toggle("z-index");
             document.getElementById("play-again").classList.toggle("hide");
           }
@@ -84,7 +72,7 @@ var utilities = {
   /**
     *Makes a jsonp ajax call to twitter's api for the username provided
   */
-  executeAjaxHandler: function(username){
+  executeAjaxHandler: function(username) {
     var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
 
     $.ajax({
@@ -116,10 +104,10 @@ var utilities = {
 var board = {
   HEIGHT: 4,
   WIDTH: 3,
-  card_count: 0,
+  cardCount: 0,
   selectedCards: [],
   cards: [],
-  number_of_matches: 0,
+  numberOfMatches: 0,
 
   /**
   *Loads the game board with data/returned tweets.
@@ -129,7 +117,7 @@ var board = {
     var random_num = 0;
     var filled_cell = true;
 
-    this.game_board = document.getElementById("board");//would be better to actually access this by class name?
+    this.game_board = document.getElementById("board");
 
     for (var i = 0; i < this.HEIGHT; i++) {
       var row = document.createElement("div");
@@ -145,10 +133,10 @@ var board = {
           random_num = board.getRandomNum();
 
           if (data[random_num]["count"] > 0) {
-            var new_card = new Card(data[random_num]["text"]);
-            row.appendChild(new_card.el);
-            this.card_count++;
-            this.cards.push(new_card);
+            var newCard = new Card(data[random_num]["text"]);
+            row.appendChild(newCard.el);
+            this.cardCount++;
+            this.cards.push(newCard);
 
             data[random_num]["count"] = data[random_num]["count"]-1;
             filled_cell = false;
@@ -169,8 +157,8 @@ var board = {
   /**
   *Resets the number of "board" clicks to zero, re-initializes selectedCards value and adjust css
   */
-  resetClicks:function(){
-    for(var i = 0; i<this.selectedCards.length; i++){
+  resetClicks:function() {
+    for (var i = 0; i < this.selectedCards.length; i++) {
       //gray out cell and disable click
       this.selectedCards[i].classList.remove("on");
       this.selectedCards[i].classList.add("off");
@@ -179,9 +167,9 @@ var board = {
   },
 
   /**
-  *Add the clicked element to the board's current_click array.
+  *Add the clicked element to the board's selectedCards array.
   */
-  recordClick: function(e){
+  recordClick: function(e) {
     this.selectedCards.push(e.target);
   },
 
@@ -189,7 +177,7 @@ var board = {
   *Compare the values/text of the elements within the board's selectedCards array. If equal, remove card from board, otherwise
   *add the click event listener back to the elements.
   */
-  compareClicks: function(){
+  compareClicks: function() {
     //this should be changed to compare something like "match_id"
     if (this.selectedCards[0].innerHTML === this.selectedCards[1].innerHTML) {
       console.log("It's a match!");
@@ -197,7 +185,7 @@ var board = {
       setTimeout(function() {
         board.removeCard();
       }, 500);
-      this.number_of_matches++;
+      this.numberOfMatches++;
     } else {
       for (var i = 0; i<this.selectedCards.length; i++) {
         var card = this.selectedCards[i];
@@ -228,11 +216,9 @@ var Card = function(text) {
     div.innerHTML = text;
     div.classList.add("div-cell");
     div.classList.add("off");
-    div.id = board.card_count;
+    div.id = board.cardCount;
 
     this.el = div;
-    this.card_name = name;
-    var self = this;
 
     var listener = function(e) {
       div.classList.remove("off");
