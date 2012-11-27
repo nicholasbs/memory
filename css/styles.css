@@ -1,53 +1,44 @@
-.memory
-{
-  color:#019AD2;
+.memory {
+  color: #019AD2;
   padding-left: 15px;
 }
 
-.div-table
-{
-  width:auto;
+.div-table {
+  width: auto;
   position: relative;
-  left:150px;
-  /*display: none;*/
+  left: 150px;
 }
 
-.div-row
-{
-  display:table-row;
-  width:auto;
+.div-row {
+  display: table-row;
+  width: auto;
 }
 
-.div-cell
-{
-  float:left;/*fix for  buggy browsers*/
-  display:table-column;
-  width:250px;
-  height:90px;
-  padding:30px;
-  border:1px solid #E8E8E8;
+.div-cell {
+  float: left;/*fix for  buggy browsers*/
+  display: table-column;
+  width: 250px;
+  height: 90px;
+  padding: 30px;
+  border: 1px solid #E8E8E8;
   font-size: 12px;
-  color:#0084B4;
+  color: #0084B4;
   background-color: #F9F9F9;
 }
 
-.off
-{
+.off {
   color:#F9F9F9;
 }
 
-.on
-{
+.on {
   color:#0084B4;
 }
 
-.removed
-{
-  color:#C7C7C7;
+.removed {
+  color: #C7C7C7;
 }
 
-.username
-{
+.username {
   position: absolute;
   top: 105px;
   left: 500px;
@@ -68,16 +59,14 @@
   padding: 30px 0px 0px 30px;
 }
 
-.play-again
-{
+.play-again {
   position: absolute;
   top: 105px;
   left: 500px;
   padding: 30px 0px 0px 30px;
 }
 
-.username-input
-{
+.username-input {
   top:20px;
   height: 20px;
   width:266px;
@@ -86,7 +75,7 @@
   border-radius: 4px 4px 4px 4px;
 }
 
-.button{
+.button {
   background-color: #019AD2;
   background-image: linear-gradient(#33BCEF, #019AD2);
   background-repeat: repeat-x;
@@ -99,39 +88,39 @@
   border-radius: 4px 4px 4px 4px;
 }
 
-.play-again .button{
+.play-again .button {
   padding:30px;
 }
 
-.hide{
+.hide {
   display: none;
 }
 
-.show-table{
+.show-table {
   display: table;
 }
 
-.show{
+.show {
   display: inline;
 }
 
-.z-index{
+.z-index {
   /*display: inline;*/
   z-index: -1;
 }
 
 .message {
-    background: none repeat scroll 0 0 rgba(20, 20, 20, 0.9);
-    border-radius: 6px 6px 6px 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    margin: 0 auto;
-    padding: 10px 12px;
-    position: relative;
-    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
-    width: 500px;
+  background: none repeat scroll 0 0 rgba(20, 20, 20, 0.9);
+  border-radius: 6px 6px 6px 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  margin: 0 auto;
+  padding: 10px 12px;
+  position: relative;
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
+  width: 500px;
 }
 
-.message .message-text{
+.message .message-text {
   color: #CCCCCC;
   font-size: 12px;
   line-height: 16px;
@@ -140,31 +129,32 @@
 }
 
 .alert-messages {
-    left: 0;
-    position: fixed;
-    right: 0;
-    top: 47px;
-    z-index: 7000;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 47px;
+  z-index: 7000;
 }
-
 
 .message .dismiss {
-    color: #FFFFFF;
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 0;
-    text-decoration: none;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 0;
+  text-decoration: none;
 }
+
 .message .close, .message .dismiss {
-    opacity: 0.5;
-    position: absolute;
-    right: 12px;
-    top: 7px;
+  opacity: 0.5;
+  position: absolute;
+  right: 12px;
+  top: 7px;
 }
+
 .dismiss {
-    cursor: pointer;
-    float: right;
-    height: 10px;
-    margin-top: 5px;
-    width: 10px;
+  cursor: pointer;
+  float: right;
+  height: 10px;
+  margin-top: 5px;
+  width: 10px;
 }
