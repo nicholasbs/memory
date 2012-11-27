@@ -99,26 +99,16 @@ var utilities = {
   *Checks for valid username input. Throws an error if invalid, loads board otherwise.
   */
   validate_input: function() {
-    var msg_obj = new Message();
+    var username = document.getElementById("username").getElementsByTagName("input")[0].value;
+    var messageDrawer = document.getElementById("message-drawer");
 
-    //if there's a username make ajax request
-    try{
-      var username = document.getElementById("username").getElementsByTagName("input")[0].value;
-
-      if(username==''){
-        throw new UserException("Must enter username to play.");
-      }
-      else{
-        //document.getElementById("message-drawer").style.display = 'none';
-        msg_obj.getMessageDrawer().classList.add("hide");
-        utilities.executeAjaxHandler(username);
-      }
-    }
-    catch(err){
-      console.log(err.name);
-      /*HERE*/msg_obj.getMessageDrawer().getElementsByClassName("message-text")[0];
-      /*HERE*/document.getElementsByClassName("message-text")[0].innerHTML = err.msg;
-      msg_obj.getMessageDrawer().classList.remove(err.class_name);//QUESTION: is this line absolutely unecessary? is it better to do the line below? i added this line to avoid accessing the dom so much...
+    if (username) {
+      messageDrawer.classList.add("hide");
+      utilities.executeAjaxHandler(username);
+    } else {
+      var msg = "Must enter username to play.";
+      messageDrawer.getElementsByClassName("message-text")[0].innerHTML = msg;
+      messageDrawer.classList.remove("hide");
     }
   }
 }
@@ -233,12 +223,6 @@ var board = {
 
 }
 
-var UserException = function(msg){
-  this.msg = msg;
-  this.name = "UserException";
-  this.class_name = "hide";
-}
-
 var Card = function(text) {
     var div = document.createElement("div"); //should div have this prepended on it?
     div.innerHTML = text;
@@ -269,15 +253,3 @@ var Card = function(text) {
 
     this.el.addEventListener("click", this.listener, false);
 }
-
-var Message = function(){
-  var message_drawer = document.getElementById("message-drawer");
-  this.message_drawer = message_drawer;
-}
-
-Message.prototype = {
-  getMessageDrawer:function(){
-    return this.message_drawer;
-  }
-}
-
