@@ -108,6 +108,7 @@ var utilities = {
 	*Checks for valid username input. Throws an error if invalid, loads board otherwise.
 	*/
 	validate_input: function(){
+		//no need for new object
 		var msg_obj = new Message();
 
 		//if there's a username make ajax request
@@ -162,7 +163,7 @@ var board = {
 				
 				/*if the count value of the randomly generated index for data is greater than 0, fill the board with that info
 				and decrease by one. data used to fill a cell can only be used twice.*/
-					random_num = board.getRandomNum(data);
+					random_num = board.getRandomNum();
 
 					if(data[random_num]["count"]>0){
 						var new_card = new Card(data[random_num]["text"]);
