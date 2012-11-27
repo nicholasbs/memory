@@ -219,30 +219,30 @@ var board = {
 }
 
 var Card = function(text) {
-    var div = document.createElement("div"); //should div have this prepended on it?
-    div.innerHTML = text;
-    div.classList.add("div-cell");
-    div.classList.add("off");
-    div.id = board.cardCount;
+  var div = document.createElement("div"); //should div have this prepended on it?
+  div.innerHTML = text;
+  div.classList.add("div-cell");
+  div.classList.add("off");
+  div.id = board.cardCount;
 
-    this.el = div;
+  this.el = div;
 
-    var listener = function(e) {
-      div.classList.remove("off");
-      div.classList.add("on");
-      board.recordClick(e);
-      this.removeEventListener("click", listener, false);
-    };
+  var listener = function(e) {
+    div.classList.remove("off");
+    div.classList.add("on");
+    board.recordClick(e);
+    this.removeEventListener("click", listener, false);
+  };
 
-    this.listener = listener;
+  this.listener = listener;
 
-    //TODO: understand the differences btwn the above code and below code
+  //TODO: understand the differences btwn the above code and below code
 
-    /*this.listener = function (e) {
-      board.incrementClicks();
-      board.recordClick(text, e);
-      this.removeEventListener("click", this.listener, false);
-    };*/
+  /*this.listener = function (e) {
+    board.incrementClicks();
+    board.recordClick(text, e);
+    this.removeEventListener("click", this.listener, false);
+  };*/
 
-    this.el.addEventListener("click", this.listener, false);
+  this.el.addEventListener("click", this.listener, false);
 }
