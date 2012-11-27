@@ -88,17 +88,24 @@ var utilities = {
   */
   validate_input: function() {
     var username = document.getElementById("username").getElementsByTagName("input")[0].value;
-    var messageDrawer = document.getElementById("message-drawer");
 
     if (username) {
-      messageDrawer.classList.add("hide");
+      hideError();
       utilities.executeAjaxHandler(username);
     } else {
-      var msg = "Must enter username to play.";
-      messageDrawer.getElementsByClassName("message-text")[0].innerHTML = msg;
-      messageDrawer.classList.remove("hide");
+      showError("Must enter username to play.");
     }
   }
+}
+
+function showError(msg) {
+  var messageDrawer = document.getElementById("message-drawer");
+  messageDrawer.getElementsByClassName("message-text")[0].innerHTML = msg;
+  messageDrawer.classList.remove("hide");
+}
+
+function hideError() {
+  document.getElementById("message-drawer").classList.add("hide");
 }
 
 var board = {
