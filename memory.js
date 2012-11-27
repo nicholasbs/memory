@@ -48,7 +48,7 @@ var utilities = {
 
     //play button clicked
     if (target.parentNode.className === "username" && target.className === "button") {
-      utilities.validate_input();
+      utilities.validateInput();
     } else if (target.parentNode.className === "play-again" && target.className === "button") {
       location.reload();
     } else if (target.className === "div-cell on") {
@@ -86,7 +86,7 @@ var utilities = {
   /**
   *Checks for valid username input. Throws an error if invalid, loads board otherwise.
   */
-  validate_input: function() {
+  validateInput: function() {
     var username = document.getElementById("username").getElementsByTagName("input")[0].value;
 
     if (username) {
