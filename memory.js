@@ -118,8 +118,8 @@ var board = {
   /**
   *Loads the game board with data/returned tweets.
   */
-  load : function (data, MAX_LENGTH) {
-    this.max_length = MAX_LENGTH;
+  load : function (data, max_length) {
+    this.max_length = max_length;
     var random_num = 0;
     var filled_cell = true;
 
