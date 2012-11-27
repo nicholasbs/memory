@@ -124,12 +124,12 @@ var utilities = {
 }
 
 var board = {
+  HEIGHT: 4,
+  WIDTH: 3,
   card_count: 0,
   selectedCards: [],
-  cards:[],
-  BOARD_LENGTH:4,
-  BOARD_WIDTH:3,
-  number_of_matches:0,
+  cards: [],
+  number_of_matches: 0,
 
   /**
   *Loads the game board with data/returned tweets.
@@ -141,17 +141,17 @@ var board = {
 
     this.game_board = document.getElementById("board");//would be better to actually access this by class name?
 
-    for (var i = 0; i < this.BOARD_LENGTH; i++) {
+    for (var i = 0; i < this.HEIGHT; i++) {
       var row = document.createElement("div");
       row.className = "div-row";
       this.game_board.appendChild(row);
 
-      for (var j = 0; j<this.BOARD_WIDTH; j++) {
+      for (var j = 0; j < this.WIDTH; j++) {
         //loop until a cell is filled with an item from the data array
-        while(filled_cell){
+        while (filled_cell) {
 
-        /*if the count value of the randomly generated index for data is greater than 0, fill the board with that info
-        and decrease by one. data used to fill a cell can only be used twice.*/
+          /*if the count value of the randomly generated index for data is greater than 0, fill the board with that info
+          and decrease by one. data used to fill a cell can only be used twice.*/
           random_num = board.getRandomNum();
 
           if (data[random_num]["count"] > 0) {
