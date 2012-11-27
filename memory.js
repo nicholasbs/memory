@@ -111,7 +111,6 @@ function hideError() {
 var board = {
   HEIGHT: 4,
   WIDTH: 3,
-  cardCount: 0,
   selectedCards: [],
   cards: [],
   numberOfMatches: 0,
@@ -142,7 +141,6 @@ var board = {
           if (data[random_num]["count"] > 0) {
             var newCard = new Card(data[random_num]["text"]);
             row.appendChild(newCard.el);
-            this.cardCount++;
             this.cards.push(newCard);
 
             data[random_num]["count"] = data[random_num]["count"]-1;
@@ -223,7 +221,7 @@ var Card = function(text) {
   div.innerHTML = text;
   div.classList.add("div-cell");
   div.classList.add("off");
-  div.id = board.cardCount;
+  div.id = Card.getNextId();
 
   this.el = div;
 
@@ -235,14 +233,12 @@ var Card = function(text) {
   };
 
   this.listener = listener;
-
-  //TODO: understand the differences btwn the above code and below code
-
-  /*this.listener = function (e) {
-    board.incrementClicks();
-    board.recordClick(text, e);
-    this.removeEventListener("click", this.listener, false);
-  };*/
-
   this.el.addEventListener("click", this.listener, false);
+}
+
+Card.getNextId = function() {
+  if (typeof this._nextId === "undefined") {
+    this._nextId = 0;
+  }
+  return this._nextId++;
 }
