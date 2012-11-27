@@ -1,6 +1,3 @@
-/**
-* Adds click event listeners to the "play" and "play again" buttons and starts game when the window loads.
-**/
 window.onload = function() {
   var container = document.getElementById("container");
   container.addEventListener("click", utilities.delegate, false);
@@ -67,7 +64,7 @@ var utilities = {
       utilities.clearInputs();
       location.reload();
     } else if (target.className === "div-cell on") { //div cell...essentially the board has been clicked
-      if (board.click_num === 2) {
+      if (board.selectedCards.length === 2) {
         board.compareClicks();
 
         //pause before resetting clicks...
@@ -127,9 +124,8 @@ var utilities = {
 }
 
 var board = {
-  click_num:0,
-  card_count:0,
-  selectedCards:[],
+  card_count: 0,
+  selectedCards: [],
   cards:[],
   BOARD_LENGTH:4,
   BOARD_WIDTH:3,
@@ -189,15 +185,7 @@ var board = {
       this.selectedCards[i].classList.remove("on");
       this.selectedCards[i].classList.add("off");
     }
-    this.click_num = 0;
     this.selectedCards = [];
-  },
-
-  /**
-  *Increment board click value by one.
-  */
-  incrementClicks: function(){
-    this.click_num++;
   },
 
   /**
@@ -265,7 +253,6 @@ var Card = function(text) {
     var listener = function(e) {
       div.classList.remove("off");
       div.classList.add("on");
-      board.incrementClicks();
       board.recordClick(e);
       this.removeEventListener("click", listener, false);
     };
