@@ -136,7 +136,7 @@ var utilities = {
 var board = {
 	click_num:0,
 	card_count:0,
-	current_clicks:[],
+	selectedCards:[],
 	cards:[],
 	BOARD_LENGTH:4,
 	BOARD_WIDTH:3,
@@ -188,16 +188,16 @@ var board = {
 	},
 
 	/**
-	*Resets the number of "board" clicks to zero, re-initializes current_clicks value and adjust css
+	*Resets the number of "board" clicks to zero, re-initializes selectedCards value and adjust css
 	*/
 	resetClicks:function(){
-		for(var i = 0; i<this.current_clicks.length; i++){
+		for(var i = 0; i<this.selectedCards.length; i++){
 			//gray out cell and disable click
-			this.current_clicks[i].target.classList.remove("on");
-			this.current_clicks[i].target.classList.add("off");
+			this.selectedCards[i].classList.remove("on");
+			this.selectedCards[i].classList.add("off");
 		}	
 		this.click_num = 0;
-		this.current_clicks = [];
+		this.selectedCards = [];
 	},
 
 	/**
@@ -210,17 +210,17 @@ var board = {
 	/**
 	*Add the clicked element to the board's current_click array.
 	*/
-	recordClick: function(element){
-		this.current_clicks.push(element);
+	recordClick: function(e){
+		this.selectedCards.push(e.target);
 	},
 
 	/**
-	*Compare the values/text of the elements within the board's current_clicks array. If equal, remove card from board, otherwise
+	*Compare the values/text of the elements within the board's selectedCards array. If equal, remove card from board, otherwise
 	*add the click event listener back to the elements.
 	*/
 	compareClicks: function(){
 		//this should be changed to compare something like "match_id"
-		if(this.current_clicks[0].target.innerHTML===this.current_clicks[1].target.innerHTML){
+		if(this.selectedCards[0].innerHTML===this.selectedCards[1].innerHTML){
 			console.log("It's a match!");
 
 			setTimeout(function(){
@@ -229,11 +229,11 @@ var board = {
 			this.number_of_matches++;
 		}
 		else{
-			for(var i = 0; i<this.current_clicks.length; i++){
-				var target = this.current_clicks[i];
+			for(var i = 0; i<this.selectedCards.length; i++){
+				var card = this.selectedCards[i];
 				
 				//add the listener back to the card
-				target.target.addEventListener("click", board.cards[target.target.id].listener, false);
+				card.addEventListener("click", board.cards[card.id].listener, false);
 				// QUESTION: is there anyway to obtain the object that the markup is attached to?
 			}
 			console.log("Welp :/");
@@ -244,10 +244,10 @@ var board = {
 	*Manipulates css to simulate a "removed" card
 	*/
 	removeCard: function(){
-		for(var i = 0; i<this.current_clicks.length; i++){
+		for(var i = 0; i<this.selectedCards.length; i++){
 			//gray out cell and disable click/remove click event listener 
-			this.current_clicks[i].target.classList.remove("on");
-			this.current_clicks[i].target.classList.add("removed");
+			this.selectedCards[i].classList.remove("on");
+			this.selectedCards[i].classList.add("removed");
 		}
 	}
 
