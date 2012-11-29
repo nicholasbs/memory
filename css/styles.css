@@ -15,22 +15,18 @@
 }
 
 .div-cell {
-  float: left;/*fix for  buggy browsers*/
+  float: left; /*fix for  buggy browsers*/
   display: table-column;
   width: 250px;
   height: 90px;
   padding: 30px;
   border: 1px solid #E8E8E8;
   font-size: 12px;
-  color: #0084B4;
+  color: #F9F9F9;
   background-color: #F9F9F9;
 }
 
-.off {
-  color:#F9F9F9;
-}
-
-.on {
+.faceup {
   color:#0084B4;
 }
 
@@ -66,7 +62,7 @@
   padding: 30px 0px 0px 30px;
 }
 
-.username-input {
+#username-input {
   top:20px;
   height: 20px;
   width:266px;
@@ -136,7 +132,7 @@
   z-index: 7000;
 }
 
-.message .dismiss {
+.message {
   color: #FFFFFF;
   font-size: 18px;
   font-weight: bold;
@@ -144,17 +140,9 @@
   text-decoration: none;
 }
 
-.message .close, .message .dismiss {
+.message .close {
   opacity: 0.5;
   position: absolute;
   right: 12px;
   top: 7px;
-}
-
-.dismiss {
-  cursor: pointer;
-  float: right;
-  height: 10px;
-  margin-top: 5px;
-  width: 10px;
 }

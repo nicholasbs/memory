@@ -1,244 +1,214 @@
-window.onload = function() {
-  var container = document.getElementById("container");
-  container.addEventListener("click", utilities.delegate, false);
-}
+(function() {
+  window.onload = function() {
+    getById("play").addEventListener("click", function() {
+      var username = getById("username-input").value;
 
-//QUESTION: why doesn't jquery ajax module recognize the anonymous version of this function?
-function jsoncallback(json) {
-  var MAX_LENGTH = 6;
-  var txt = '';
-  var data = [];
-
-  //shuffle tweets. fisher yates suffle
-  for (var i = json.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = json[i];
-    json[i] = json[j];
-    json[j] = temp;
-  }
-
-  if (json.length >= MAX_LENGTH) {
-    for (var i = 0; i<MAX_LENGTH; i++) {
-      txt = json[i].text;
-
-      var obj = {text:txt, count:2};
-      data.push(obj);
-    }
-    board.load(data, MAX_LENGTH);
-    document.getElementById("username").classList.toggle("hide");
-    document.getElementById("board").classList.remove("hide");
-    document.getElementById("board").classList.add("show-table");
-  } else if (json.error === "Not authorized") {
-    console.log('This user is private. Choose another username');
-  }
-  else if (json.errors !== "") {
-    console.log("This user doesn't exist. Choose another username");
-  } else {
-    //maybe make an error object that routes errors accordingly?
-    console.log('Bummer, not enough tweets to play. Choose another username.');
-  }
-}
-
-var utilities = {
-  /**
-  *Implements event delegation for clicks within the container...the game board
-  */
-  delegate: function(e) {
-    var target = e ? e.target : window.event.srcElement; //for IE
-
-    //play button clicked
-    if (target.parentNode.className === "username" && target.className === "button") {
-      utilities.validateInput();
-    } else if (target.parentNode.className === "play-again" && target.className === "button") {
-      location.reload();
-    } else if (target.className === "div-cell on") {
-      if (board.selectedCards.length === 2) {
-        board.compareClicks();
-
-        //pause before resetting clicks...
-        setTimeout(function() {
-          board.resetClicks();
-
-          //if number of matches found == MAX_LENGTH, the game has ended, ask to reload board...
-          if (board.numberOfMatches === board.max_length) {
-            document.getElementById("username").classList.toggle("z-index");
-            document.getElementById("play-again").classList.toggle("hide");
-          }
-        }, 500);
+      if (username) {
+        hideError();
+        requestTweets(username);
+      } else {
+        showError("Please enter a username");
       }
-    }
-  },
+    });
 
-  /**
-    *Makes a jsonp ajax call to twitter's api for the username provided
-  */
-  executeAjaxHandler: function(username) {
+    getById("play-again").addEventListener("click", function() {
+      location.reload();
+    });
+  };
+
+  function requestTweets(username) {
     var url = "https://api.twitter.com/1/statuses/user_timeline.json?screen_name="+username+"&count=20";
 
     $.ajax({
-          url: url,
-          dataType: "jsonp",
-          jsonp : "callback",
-          jsonpCallback: "jsoncallback"
-      });
-  },
+      url: url,
+      dataType: "jsonp",
+      jsonp : "callback",
+      success: loadTweets
+    });
+  }
 
-  /**
-  *Checks for valid username input. Throws an error if invalid, loads board otherwise.
-  */
-  validateInput: function() {
-    var username = document.getElementById("username").getElementsByTagName("input")[0].value;
+  function loadTweets(json) {
+    var ROWS = 4;
+    var COLS = 3;
+    var UNIQUE_CARDS = ROWS * COLS / 2;
 
-    if (username) {
-      hideError();
-      utilities.executeAjaxHandler(username);
+    if (json.length < UNIQUE_CARDS) {
+      showError('Bummer, not enough tweets to play. Choose another username.');
     } else {
-      showError("Must enter username to play.");
+      var tweets = json.map(function(item) { return item.text; });
+      var board = new Board(tweets, ROWS, COLS);
+
+      getById("username").classList.add("hide");
+      board.show();
     }
   }
-}
 
-function showError(msg) {
-  var messageDrawer = document.getElementById("message-drawer");
-  messageDrawer.getElementsByClassName("message-text")[0].innerHTML = msg;
-  messageDrawer.classList.remove("hide");
-}
-
-function hideError() {
-  document.getElementById("message-drawer").classList.add("hide");
-}
-
-var board = {
-  HEIGHT: 4,
-  WIDTH: 3,
-  selectedCards: [],
-  cards: [],
-  numberOfMatches: 0,
-
-  /**
-  *Loads the game board with data/returned tweets.
-  */
-  load : function (data, max_length) {
-    this.max_length = max_length;
-    var random_num = 0;
-    var filled_cell = true;
-
-    this.game_board = document.getElementById("board");
-
-    for (var i = 0; i < this.HEIGHT; i++) {
-      var row = document.createElement("div");
-      row.className = "div-row";
-      this.game_board.appendChild(row);
-
-      for (var j = 0; j < this.WIDTH; j++) {
-        //loop until a cell is filled with an item from the data array
-        while (filled_cell) {
-
-          /*if the count value of the randomly generated index for data is greater than 0, fill the board with that info
-          and decrease by one. data used to fill a cell can only be used twice.*/
-          random_num = board.getRandomNum();
-
-          if (data[random_num]["count"] > 0) {
-            var newCard = new Card(data[random_num]["text"]);
-            row.appendChild(newCard.el);
-            this.cards.push(newCard);
-
-            data[random_num]["count"] = data[random_num]["count"]-1;
-            filled_cell = false;
-          }
-        }
-        filled_cell = true;
-      }
-    }
-  },
-
-  /**
-  *Returns a randomly generated number btwn the values of 0 and the length of the data array.
-  */
-  getRandomNum: function () {
-    return Math.floor((Math.random()*(this.max_length)));
-  },
-
-  /**
-  *Resets the number of "board" clicks to zero, re-initializes selectedCards value and adjust css
-  */
-  resetClicks:function() {
-    for (var i = 0; i < this.selectedCards.length; i++) {
-      //gray out cell and disable click
-      this.selectedCards[i].classList.remove("on");
-      this.selectedCards[i].classList.add("off");
-    }
+  function Board(data, rows, cols) {
+    this.rows = rows;
+    this.cols = cols;
+    this.cards = {};
     this.selectedCards = [];
-  },
+    this.numberOfMatches = 0;
+    this.el = getById("board");
 
-  /**
-  *Add the clicked element to the board's selectedCards array.
-  */
-  recordClick: function(e) {
-    this.selectedCards.push(e.target);
-  },
+    this.load(data);
 
-  /**
-  *Compare the values/text of the elements within the board's selectedCards array. If equal, remove card from board, otherwise
-  *add the click event listener back to the elements.
-  */
-  compareClicks: function() {
-    //this should be changed to compare something like "match_id"
-    if (this.selectedCards[0].innerHTML === this.selectedCards[1].innerHTML) {
-      console.log("It's a match!");
+    var self = this;
+    this.el.addEventListener("click", function(e) {
+      if (self.selectedCards.length === 2)
+        return; // ignore additional clicks
 
-      setTimeout(function() {
-        board.removeCard();
-      }, 500);
-      this.numberOfMatches++;
-    } else {
-      for (var i = 0; i<this.selectedCards.length; i++) {
-        var card = this.selectedCards[i];
+      var clickedCard = self.cards[e ? e.target.id : window.event.srcElement.id];
 
-        //add the listener back to the card
-        card.addEventListener("click", board.cards[card.id].listener, false);
-        // QUESTION: is there anyway to obtain the object that the markup is attached to?
+      if (!clickedCard.isRemoved() && !clickedCard.isFaceUp()) {
+        clickedCard.flipFaceUp();
+        self.selectedCards.push(clickedCard);
+        if (self.selectedCards.length === 2) {
+          setTimeout(function() { self.compareSelectedCards(); }, 500);
+        }
       }
-      console.log("Welp :/");
-    }
-  },
-
-  /**
-  *Manipulates css to simulate a "removed" card
-  */
-  removeCard: function() {
-    for (var i = 0; i<this.selectedCards.length; i++) {
-      //gray out cell and disable click/remove click event listener
-      this.selectedCards[i].classList.remove("on");
-      this.selectedCards[i].classList.add("removed");
-    }
+    });
   }
 
-}
+  Board.prototype = {
+    load: function(data) {
+      data = data.slice(0, this.uniqueCards());
+      var dupeData = shuffle(data.concat(data));
 
-var Card = function(text) {
-  var div = document.createElement("div"); //should div have this prepended on it?
-  div.innerHTML = text;
-  div.classList.add("div-cell");
-  div.classList.add("off");
-  div.id = Card.getNextId();
+      for (var i = 0, cardNum = 0; i < this.rows; i++) {
+        var row = document.createElement("div");
+        row.className = "div-row";
+        this.el.appendChild(row);
 
-  this.el = div;
+        for (var j = 0; j < this.cols; j++, cardNum++) {
+          var newCard = new Card(dupeData[cardNum]);
+          row.appendChild(newCard.el);
+          this.cards[newCard.el.id] = newCard;
+        }
+      }
+    },
 
-  var listener = function(e) {
-    div.classList.remove("off");
-    div.classList.add("on");
-    board.recordClick(e);
-    this.removeEventListener("click", listener, false);
+    unselectCards: function() {
+      for (var i = 0; i < this.selectedCards.length; i++) {
+        this.selectedCards[i].flipFaceDown();
+      }
+      this.selectedCards = [];
+    },
+
+    compareSelectedCards: function() {
+      if (this.selectedCards[0].matchId === this.selectedCards[1].matchId) {
+        this.removeSelectedCards();
+        this.numberOfMatches++;
+
+        if (this.solved()) {
+            getById("play-again").classList.remove("hide");
+        }
+      } else {
+        this.unselectCards();
+      }
+    },
+
+    removeSelectedCards: function() {
+      for (var i = 0; i < this.selectedCards.length; i++) {
+        this.selectedCards[i].remove();
+      }
+      this.selectedCards = [];
+    },
+
+    uniqueCards: function() {
+      return this.rows * this.cols / 2;
+    },
+
+    solved: function() {
+      return this.numberOfMatches === this.uniqueCards();
+    },
+
+    show: function() {
+      this.el.classList.remove("hide");
+      this.el.classList.add("show-table");
+    }
   };
 
-  this.listener = listener;
-  this.el.addEventListener("click", this.listener, false);
-}
+  function Card(text, board) {
+    this.el = document.createElement("div");
+    this.el.innerHTML = text;
+    this.el.classList.add("div-cell");
+    this.el.id = Card.getNextId();
 
-Card.getNextId = function() {
-  if (typeof this._nextId === "undefined") {
-    this._nextId = 0;
+    this.matchId = Card.getMatchIdFor(text);
   }
-  return this._nextId++;
-}
+
+  Card.getNextId = function() {
+    if (typeof this._nextId === "undefined") {
+      this._nextId = 0;
+    }
+    return this._nextId++;
+  }
+
+  Card.getMatchIdFor = function(text) {
+    if (typeof this._matchIds === "undefined") {
+      this._matchIds = {};
+    }
+    if (typeof this._matchIds[text] === "undefined") {
+      this._matchIds[text] = this._nextId;
+    }
+    return this._matchIds[text];
+  }
+
+  Card.prototype = {
+    flipFaceUp: function() {
+      this.el.classList.add("faceup");
+    },
+
+    flipFaceDown: function() {
+      this.el.classList.remove("faceup");
+    },
+
+    isFaceUp: function() {
+      return hasClass(this.el, "faceup");
+    },
+
+    remove: function() {
+      this.el.classList.add("removed");
+    },
+
+    isRemoved: function() {
+      return hasClass(this.el, "removed");
+    }
+  };
+
+
+  //Fisher-Yates suffle -- destructive!
+  function shuffle(list) {
+    var i, j, temp;
+    for (i = list.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random()*i);
+      temp = list[i];
+      list[i] = list[j];
+      list[j] = temp;
+    }
+    return list;
+  }
+
+  function hasClass(el, cls) {
+    for (var i = 0; i < el.classList.length; i++) {
+      if (el.classList[i] === cls)
+        return true;
+    }
+    return false;
+  }
+
+  function getById(id) {
+    return document.getElementById(id);
+  }
+
+  function showError(msg) {
+    var messageDrawer = getById("message-drawer");
+    messageDrawer.getElementsByClassName("message-text")[0].innerHTML = msg;
+    messageDrawer.classList.remove("hide");
+  }
+
+  function hideError() {
+    getById("message-drawer").classList.add("hide");
+  }
+})();
